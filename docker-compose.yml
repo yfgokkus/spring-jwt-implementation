@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql
+    restart: always
+    container_name: jwt-test-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: jwt-test-db
+      MYSQL_USER: jwt-test-user
+      MYSQL_PASSWORD: jwt-test-pass
+    ports:
+      - '3307:3306'
