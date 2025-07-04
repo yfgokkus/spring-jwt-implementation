@@ -17,8 +17,8 @@ public class JwtService {
 
     @Value("${jwt.key}")
     private String SECRET;
-    private static final long ACCESS_TOKEN_EXPIRATION = 15 * 60 * 60 * 1000L; // 30 seconds
-    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L; //
+    private static final long ACCESS_TOKEN_EXPIRATION = 15 * 60 * 1000L; // 15 mins
+    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L; // 7 days
 
 
     public String generateAccessToken(UserDetails user) {
@@ -44,15 +44,22 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSignKey()) // HMAC key
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-
-        return claims.getSubject(); // 'sub' claim = username
     }
+
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    private Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         String username = extractUsername(token);
@@ -61,15 +68,6 @@ public class JwtService {
         return userDetails.getUsername().equals(username) && expiration.after(new Date());
     }
 
-    private Date extractExpiration(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSignKey()) // HMAC key
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
-        return claims.getExpiration();
-    }
 
     private SecretKey getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET);

@@ -1,9 +1,10 @@
 package com.example.jwtoken.service;
 
 import com.example.jwtoken.dto.CreateUserRequest;
+import com.example.jwtoken.exception.user.UserCreationException;
+import com.example.jwtoken.exception.user.UsernameAlreadyExistsException;
 import com.example.jwtoken.models.User;
 import com.example.jwtoken.repo.UserRepo;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,10 +12,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class UserService implements UserDetailsService {
+
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
@@ -31,7 +31,7 @@ public class UserService implements UserDetailsService {
 
     public User createUser(CreateUserRequest request) {
         if (userRepo.existsByUsername(request.username())) {
-            throw new IllegalArgumentException("Username '" + request.username() + "' is already taken");
+            throw new UsernameAlreadyExistsException(request.username());
         }
 
         User newUser = User.builder()
@@ -48,7 +48,8 @@ public class UserService implements UserDetailsService {
         try {
             return userRepo.save(newUser);
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Failed to save user: " + e.getMessage(), e);
+            throw new UserCreationException("Failed to save user to database", e);
         }
     }
 }
+
