@@ -35,14 +35,16 @@ public class UserController {
         log.info("User '{}' successfully created", request.username());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/user")
+    public String getUserString(){
+        return "This is the User";
+    }
+
+    @GetMapping("/admin")
+    public String getAdminString(){
+        return "This is the Admin";
+    }
+
 }
 
-//    @GetMapping("/user")
-//    public String getUserString(){
-//        return "This is the User";
-//    }
-//
-//    @GetMapping("/admin")
-//    public String getAdminString(){
-//        return "This is the Admin";
-//    }

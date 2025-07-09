@@ -15,13 +15,12 @@ import java.util.Map;
 public class JwtService {
 
     private final SecretKey secretKey;
-    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 1000L; // 30 s
+    private static final long ACCESS_TOKEN_EXPIRATION = 60 * 1000L; // 30 s
     private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L; // 7 days
 
     public JwtService(SecretKey secretKey) {
         this.secretKey = secretKey;
     }
-
 
     public String generateAccessToken(UserDetails user) {
         Map<String, Object> claims = new HashMap<>();
@@ -68,6 +67,4 @@ public class JwtService {
 
         return userDetails.getUsername().equals(username) && expiration.after(new Date());
     }
-
-
 }

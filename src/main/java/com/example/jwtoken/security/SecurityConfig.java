@@ -35,11 +35,18 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(x->
-                        x.requestMatchers("/auth/welcome/**", "/auth/addNewUser/**", "/auth/generateToken/**").permitAll())
-                .authorizeHttpRequests(x ->
-                                x.requestMatchers("/auth/user/**").hasRole("USER")
-                                .requestMatchers("/auth/admin/**").hasRole("ADMIN")
+                .authorizeHttpRequests(auth -> auth
+                        // AuthController
+                        .requestMatchers("/auth/**").permitAll()
+
+                        // UserController (Specific to General)
+                        .requestMatchers("/users/admin").hasRole("ADMIN")
+                        .requestMatchers("/users/user").hasRole("USER")
+                        .requestMatchers("/users/welcome").permitAll()
+                        .requestMatchers("/users").permitAll() // Allow only registration
+
+                        // Fallback
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//https://www.baeldung.com/spring-security-session
                 .authenticationProvider(authenticationProvider())
